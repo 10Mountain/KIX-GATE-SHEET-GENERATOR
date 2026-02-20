@@ -1,0 +1,474 @@
+:root {
+    --memphis-pink: #FF7EB9;
+    --memphis-mint: #7AFCA1;
+    --memphis-yellow: #FFD900;
+    --memphis-teal: #00E5FF;
+    --memphis-black: #2d2d2d;
+    --border-width: 3px;
+    --shadow-offset: 6px;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f0f0f0;
+    /* Memphis Pattern Background */
+    background-image: radial-gradient(var(--memphis-black) 10%, transparent 10%),
+        radial-gradient(var(--memphis-black) 10%, transparent 10%);
+    background-size: 20px 20px;
+    background-position: 0 0, 10px 10px;
+    background-color: #fffdf0;
+    /* Creamy background */
+    color: var(--memphis-black);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h1 {
+    font-size: 3rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    text-shadow: 4px 4px 0px var(--memphis-pink);
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+    background: white;
+    padding: 5px 15px;
+    border: var(--border-width) solid var(--memphis-black);
+    box-shadow: var(--shadow-offset) var(--shadow-offset) 0px var(--memphis-teal);
+    transform: rotate(-2deg);
+}
+
+p {
+    font-size: 1.1rem;
+    background: white;
+    padding: 5px;
+    border: 2px solid var(--memphis-black);
+    box-shadow: 4px 4px 0px var(--memphis-mint);
+    font-weight: 500;
+}
+
+/* Control Panel */
+.control-panel {
+    background: white;
+    border: var(--border-width) solid var(--memphis-black);
+    padding: 30px;
+    width: 100%;
+    max-width: 800px;
+    box-shadow: 10px 10px 0px var(--memphis-black);
+    margin-bottom: 40px;
+    position: relative;
+    border-radius: 15px;
+}
+
+/* Decorative shapes */
+.control-panel::before {
+    content: '';
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    width: 0;
+    height: 0;
+    border-left: 30px solid transparent;
+    border-right: 30px solid transparent;
+    border-bottom: 50px solid var(--memphis-yellow);
+    z-index: -1;
+    transform: rotate(15deg);
+}
+
+.control-panel::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: -10px;
+    width: 40px;
+    height: 40px;
+    background: var(--memphis-pink);
+    border: 2px solid var(--memphis-black);
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: inline-block;
+    font-weight: 700;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    font-size: 1rem;
+    background-color: var(--memphis-mint);
+    border: 2px solid var(--memphis-black);
+    padding: 2px 10px;
+    box-shadow: 3px 3px 0px var(--memphis-black);
+    transform: rotate(1deg);
+}
+
+textarea,
+input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    border: 3px solid var(--memphis-black);
+    background-color: #fff;
+    font-family: monospace;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: all 0.2s;
+    border-radius: 8px;
+    margin-top: 5px;
+}
+
+textarea:focus,
+input[type="text"]:focus {
+    outline: none;
+    background-color: #fff5e6;
+    box-shadow: 5px 5px 0px var(--memphis-pink);
+}
+
+button {
+    background-color: var(--memphis-teal);
+    color: var(--memphis-black);
+    font-weight: 900;
+    text-transform: uppercase;
+    border: 3px solid var(--memphis-black);
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 6px 6px 0px var(--memphis-black);
+    border-radius: 30px;
+    transition: all 0.1s;
+    width: 100%;
+}
+
+button:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 8px 8px 0px var(--memphis-black);
+    background-color: #5cf2ff;
+}
+
+button:active {
+    transform: translate(4px, 4px);
+    box-shadow: 2px 2px 0px var(--memphis-black);
+}
+
+/* Sheet Layout (Scientific Precision) */
+#sheet-container {
+    width: 210mm;
+    margin: 0 auto;
+}
+
+.sheet-page {
+    width: 210mm;
+    min-height: 297mm;
+    position: relative;
+    background: white;
+    padding: 5mm;
+    /* Reduced Padding */
+    box-sizing: border-box;
+    margin-bottom: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header Grid */
+.sheet-header {
+    display: flex;
+    border-top: 3px solid black;
+    /* Python: lw=3 */
+    border-bottom: 3px solid black;
+    margin-bottom: 2px;
+    height: 35px;
+    align-items: center;
+}
+
+.header-cell {
+    text-align: center;
+    font-weight: 700;
+    font-size: 14px;
+    font-family: 'Arial', sans-serif;
+    color: black;
+    /* Flex values must match data rows exactly */
+}
+
+/* Flight Block - The "Outer Frame" */
+.flight-block {
+    margin-bottom: 5px;
+    /* Tight Spacing */
+    border: 2px solid blue;
+    display: flex;
+    flex-direction: column;
+    page-break-inside: avoid;
+}
+
+.data-row {
+    display: flex;
+    height: 45px;
+    /* Compact Data Row */
+    align-items: stretch;
+    border-bottom: 1px solid blue;
+}
+
+.data-cell {
+    text-align: center;
+    font-size: 14px;
+    font-family: 'Arial', sans-serif;
+    color: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 0.5px solid blue;
+    white-space: pre-wrap;
+    line-height: 1.1;
+    overflow: hidden;
+    padding: 1px;
+}
+
+.data-cell:last-child {
+    border-right: none;
+}
+
+.notes-row {
+    font-family: 'Arial', sans-serif;
+    font-size: 13px;
+    padding: 5px 10px;
+    height: 68px;
+    /* Still generous for notes, but fits page */
+    display: flex;
+    align-items: flex-start;
+    /* Align text to top */
+    color: black;
+}
+
+/* Column Widths (Exact Ratios from Python) */
+/* [0.7, 0.7, 0.7, 1.1, 1.1, 1.1, 0.7, 1.4, 0.7, 1.4] */
+.col-0 {
+    flex: 0.7;
+}
+
+.col-1 {
+    flex: 0.7;
+}
+
+.col-2 {
+    flex: 0.7;
+}
+
+.col-3 {
+    flex: 1.1;
+}
+
+.col-4 {
+    flex: 1.1;
+}
+
+.col-5 {
+    flex: 1.1;
+}
+
+.col-6 {
+    flex: 0.7;
+}
+
+.col-7 {
+    flex: 1.4;
+}
+
+.col-8 {
+    flex: 0.7;
+}
+
+.col-9 {
+    flex: 1.4;
+}
+
+/* Utility Classes */
+.bg-pink {
+    background-color: #FFC0CB !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.bg-yellow {
+    background-color: #FFFFE0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* Gantt Chart Styles */
+/* Gantt Chart Styles */
+.gantt-container {
+    position: absolute;
+    bottom: 5mm;
+    left: 5mm;
+    right: 5mm;
+    height: 90mm;
+    border: 2px solid black;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    padding: 5px;
+}
+
+.gantt-title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 5px;
+    border-bottom: 2px solid black;
+    height: 20px;
+}
+
+.gantt-body {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.gantt-gate-axis {
+    width: 40px;
+    /* Increased from 30px */
+    position: relative;
+    border-right: 2px solid black;
+}
+
+.gantt-gate-label {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    font-size: 10px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gantt-chart-area {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+    /* Ensure bars don't bleed */
+}
+
+/* Time Axis (Bottom) */
+.gantt-axis-label {
+    position: absolute;
+    bottom: 2px;
+    /* Position at bottom of chart area */
+    transform: translateX(-50%);
+    font-size: 10px;
+    font-weight: bold;
+    z-index: 20;
+}
+
+/* Grid Lines */
+.gantt-grid-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-left: 1px dashed #ccc;
+    pointer-events: none;
+}
+
+.gantt-grid-line-row {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border-bottom: 1px solid #eee;
+    pointer-events: none;
+}
+
+/* Bars */
+.gantt-bar {
+    position: absolute;
+    border: 1px solid black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    box-sizing: border-box;
+    z-index: 10;
+}
+
+.gantt-bar-text {
+    z-index: 1;
+}
+
+.gantt-label {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    font-size: 9px;
+    font-weight: normal;
+}
+
+
+/* Print Styles (Strict A4 No-Overflow) */
+@media print {
+    @page {
+        size: A4;
+        margin: 0;
+    }
+
+    html,
+    body {
+        width: 210mm;
+        height: 297mm;
+        margin: 0;
+        padding: 0;
+        background: white;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    #sheet-container {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .sheet-page {
+        margin: 0;
+        padding: 5mm;
+        /* Reduced Padding */
+        width: 210mm;
+        height: 297mm;
+        /* Exact A4 height */
+        box-sizing: border-box;
+        border: none;
+        box-shadow: none;
+        background: white;
+
+        /* Critical for preventing overflow pages */
+        overflow: hidden;
+        overflow: hidden;
+        page-break-after: always;
+        position: relative;
+    }
+
+    /* Page 1 Break */
+    #page-1 {
+        page-break-after: always;
+    }
+
+    /* Page 2 No Break (last page) */
+    #page-2 {
+        page-break-after: avoid;
+    }
+
+    /* Print Precision */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}

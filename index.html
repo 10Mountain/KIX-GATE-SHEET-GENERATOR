@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KIX Gate Sheet Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="no-print control-panel">
+        <h1>KIX Gate Sheet Generator</h1>
+        <p>Please paste the raw data below and click "Generate". Then use browser print (Ctrl+P) to save as PDF.</p>
+
+        <div class="input-group">
+            <label for="flight-log">Flight Data ( Paste gate sheet Lite):</label>
+            <textarea id="flight-log" placeholder="Paste flight log data here..." rows="10"></textarea>
+        </div>
+
+        <div class="input-group">
+            <label for="work-release">Todays Work Release (Paste here):</label>
+            <textarea id="work-release" placeholder="Paste Todays Work Release data here..." rows="10"></textarea>
+        </div>
+
+        <div class="input-group">
+            <label for="user-text">Personnel / Memo Data (Paste here):</label>
+            <textarea id="user-text" placeholder="Paste personnel/memo data here..." rows="10"></textarea>
+        </div>
+
+        <div class="input-group">
+            <label for="highlight-name">Highlight Name (Optional):</label>
+            <input type="text" id="highlight-name" placeholder="Enter name to highlight..."
+                style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+
+        <button id="generate-btn">Generate Sheet</button>
+    </div>
+
+    <div id="sheet-container">
+        <!-- Generated sheets will appear here -->
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
