@@ -420,7 +420,8 @@ button:active {
 
     html,
     body {
-        width: 210mm;
+        width: 100vw;
+        height: 100vh;
         margin: 0;
         padding: 0;
         background: white;
@@ -431,17 +432,19 @@ button:active {
     }
 
     #sheet-container {
-        width: 210mm;
+        width: 100%;
         margin: 0;
         padding: 0;
     }
 
     .sheet-page {
-        margin: 0;
-        padding: 5mm;
-        width: 210mm;
-        height: 297mm;
-        max-height: 297mm;
+        margin: 0 auto;
+        padding: 10px;
+        /* Reduced to ensure it fits completely inside printable area */
+        width: 100%;
+        height: 100vh;
+        /* Use viewport height to snap exactly to page bounds on iPad */
+        max-height: 100vh;
         box-sizing: border-box;
         border: none;
         box-shadow: none;
