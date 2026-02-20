@@ -421,11 +421,9 @@ button:active {
     html,
     body {
         width: 210mm;
-        height: 297mm;
         margin: 0;
         padding: 0;
         background: white;
-        overflow: hidden !important;
     }
 
     .no-print {
