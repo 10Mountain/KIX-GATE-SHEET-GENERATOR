@@ -414,7 +414,7 @@ button:active {
 /* Print Styles (Strict A4 No-Overflow) */
 @media print {
     @page {
-        size: A4;
+        size: A4 portrait;
         margin: 0;
     }
 
@@ -425,6 +425,7 @@ button:active {
         margin: 0;
         padding: 0;
         background: white;
+        overflow: hidden !important;
     }
 
     .no-print {
@@ -432,7 +433,7 @@ button:active {
     }
 
     #sheet-container {
-        width: 100%;
+        width: 210mm;
         margin: 0;
         padding: 0;
     }
@@ -440,30 +441,33 @@ button:active {
     .sheet-page {
         margin: 0;
         padding: 5mm;
-        /* Reduced Padding */
         width: 210mm;
         height: 297mm;
-        /* Exact A4 height */
+        max-height: 297mm;
         box-sizing: border-box;
         border: none;
         box-shadow: none;
         background: white;
 
         /* Critical for preventing overflow pages */
-        overflow: hidden;
-        overflow: hidden;
+        overflow: hidden !important;
         page-break-after: always;
+        page-break-inside: avoid;
+        break-after: page;
+        break-inside: avoid;
         position: relative;
     }
 
     /* Page 1 Break */
     #page-1 {
         page-break-after: always;
+        break-after: page;
     }
 
     /* Page 2 No Break (last page) */
     #page-2 {
         page-break-after: avoid;
+        break-after: auto;
     }
 
     /* Print Precision */
