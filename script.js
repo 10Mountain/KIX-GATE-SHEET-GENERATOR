@@ -478,8 +478,8 @@ function renderSheets(flights, highlightName) {
             page.appendChild(block);
         });
 
-        // Add Gantt Chart to Page 2
-        if (pageIndex === 1) {
+        // Add Gantt Chart to Page 2 only if flights are less than 13
+        if (pageIndex === 1 && flights.length < 13) {
             renderGantt(flights, page);
         }
 
