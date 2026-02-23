@@ -456,7 +456,22 @@ function renderSheets(flights, highlightName) {
             // Bottom Half: Notes
             const notesRow = document.createElement('div');
             notesRow.className = 'notes-row';
-            notesRow.textContent = `Notes: ${f.NOTES}`;
+
+            // Escape HTML basic chars for safety, then apply specific formatting
+            const escapeHtml = (unsafe) => {
+                return (unsafe || "").toString()
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            };
+
+            let safeNotes = escapeHtml(`Notes: ${f.NOTES}`);
+            // Highlight 'spj push' in blue (case-insensitive)
+            safeNotes = safeNotes.replace(/(spj\s*push)/ig, '<span style="color: blue; font-weight: bold;">$1</span>');
+
+            notesRow.innerHTML = safeNotes;
             notesRow.style.color = f.NOTE_COLOR;
             block.appendChild(notesRow);
 
