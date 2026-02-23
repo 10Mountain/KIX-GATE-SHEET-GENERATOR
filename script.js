@@ -439,7 +439,7 @@ function renderSheets(flights, highlightName) {
 
                 // Specific Cell Highlights
                 // CHK cell (idx 2)
-                const hasSVC = (f.CHK && /SVC-chk/i.test(f.CHK)) || (f.NOTES && /SVC-chk/i.test(f.NOTES));
+                const hasSVC = (f.CHK && /SVC/i.test(f.CHK)) || (f.NOTES && /SVC/i.test(f.NOTES));
                 if (idx === 2 && (f.CHK_BG === 'bg-pink' || hasSVC)) {
                     div.classList.add('bg-pink');
                 }
