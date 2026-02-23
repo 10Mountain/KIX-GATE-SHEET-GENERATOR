@@ -36,8 +36,63 @@ function processData(logRaw, userRaw, workReleaseRaw) {
     const userMap = {};
     const userLines = userRaw.trim().split('\n');
     userLines.forEach(line => {
-        const parts = line.split('\t');
-        if (parts.length < 1 || (line.includes("ACN") && line.length < 10)) return; // Skip potential header
+        let parts = line.split('\t');
+
+        // If it's space-separated (no tabs or very few), try custom parsing for email/whiteboard text
+        if (parts.length < 2 || !line.includes('\t')) {
+            const tokens = line.trim().split(/\s+/);
+            if (tokens.length >= 2 && /^\d{2,4}$/.test(tokens[0])) {
+                const acn = tokens[0];
+                let names = [];
+                let chk = "";
+                let notesTokens = [];
+                const chkKeywords = ["PDSC", "SVC", "SEC", "DAILY", "SVC-CHK", "SVC-chk", "SVC-Chk"];
+
+                let i = 1;
+                for (; i < tokens.length; i++) {
+                    const t = tokens[i];
+                    const upperT = t.toUpperCase();
+
+                    // 1. Is it a known CHK keyword?
+                    if (chkKeywords.includes(upperT) || /^SVC/i.test(t)) {
+                        chk = t;
+                        i++; // Move to next for notes
+                        break; // Stop parsing names/CHK, the rest are notes
+                    }
+
+                    // 2. Does it look like the start of notes?
+                    // E.g., numbers like '85.0', '56.2', times like '05:15', or English words (excluding single letter 'X' often used as a mark)
+                    // Japanese text is usually NOT the start of notes until we hit these.
+                    // Also ensure we don't accidentally break on part of a name (which is extremely rare to be just numbers/English in your context)
+                    if (/^[0-9]/.test(t) || (/^[A-Za-z]+/.test(t) && t !== "X" && t !== "x" && !chkKeywords.includes(upperT) && !/^SVC/i.test(t))) {
+                        break; // Stop parsing names, this is the start of notes
+                    }
+
+                    // 3. Otherwise, it's considered a name (up to 3 allowed)
+                    if (names.length < 3) {
+                        names.push(t);
+                    } else {
+                        break; // exceeded max names, the rest are notes
+                    }
+                }
+
+                // Any remaining tokens are notes
+                if (i < tokens.length) {
+                    notesTokens = tokens.slice(i);
+                }
+
+                parts = [
+                    acn,
+                    names.length > 0 ? names[0] : "",
+                    names.length > 1 ? names[1] : "",
+                    names.length > 2 ? names[2] : "",
+                    chk,
+                    notesTokens.join(" ")
+                ];
+            } else {
+                return; // Skip unrecognizable header or invalid line
+            }
+        }
 
         // Pad parts
         while (parts.length < 6) parts.push("");
