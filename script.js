@@ -11,6 +11,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const highlightInput = document.getElementById('highlight-name');
         if (highlightInput) {
             highlightName = highlightInput.value.trim();
+
+            // Special alias for Eric
+            const ericAliases = ["eric", "ERIC", "エリック"];
+            if (ericAliases.includes(highlightName)) {
+                highlightName = "E・Ｈ";
+            }
         }
 
         if (!logData.trim()) {
