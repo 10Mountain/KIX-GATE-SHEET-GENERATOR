@@ -507,11 +507,32 @@ function renderSheets(flights, highlightName) {
 function renderGantt(flights, container) {
     if (flights.length === 0) return;
 
-    // 1. Calculate Time Axis: Created Time - 2h to +12h (Total 14h)
+    // 1. Calculate Time Axis based on current time
     const now = new Date();
-    const nowSchema = new Date(now.getTime() + 9 * 3600000);
-    const startTime = new Date(nowSchema.getTime() - 2 * 3600000);
-    const endTime = new Date(nowSchema.getTime() + 12 * 3600000);
+    const nowJST = new Date(now.getTime() + 9 * 3600000);
+    const jstHour = nowJST.getUTCHours();
+    const jstMinute = nowJST.getUTCMinutes();
+    const totalMins = jstHour * 60 + jstMinute;
+
+    let startTime, endTime;
+    // 01:01 (61) to 13:59 (839)
+    if (totalMins >= 61 && totalMins <= 839) {
+        // Day shift: 05:30 to 19:00
+        startTime = new Date(nowJST);
+        startTime.setUTCHours(5, 30, 0, 0);
+        endTime = new Date(nowJST);
+        endTime.setUTCHours(19, 0, 0, 0);
+    } else {
+        // Night shift: 17:30 to 07:00
+        startTime = new Date(nowJST);
+        if (jstHour < 14) {
+            startTime.setUTCDate(startTime.getUTCDate() - 1);
+        }
+        startTime.setUTCHours(17, 30, 0, 0);
+        endTime = new Date(startTime);
+        endTime.setUTCDate(endTime.getUTCDate() + 1);
+        endTime.setUTCHours(7, 0, 0, 0);
+    }
 
     // 2. Prepare Gate Axis (FIXED: 251-260)
     const sortedGates = ["251", "252", "253", "254", "255", "256", "257", "258", "259", "260"];
@@ -522,7 +543,11 @@ function renderGantt(flights, container) {
     // Title
     const title = document.createElement('div');
     title.className = 'gantt-title';
-    title.textContent = `GATE GANTT CHART (${startTime.getUTCHours()}:00 - ${endTime.getUTCHours()}:00 JST)`;
+    const sHour = String(startTime.getUTCHours()).padStart(2, '0');
+    const sMin = String(startTime.getUTCMinutes()).padStart(2, '0');
+    const eHour = String(endTime.getUTCHours()).padStart(2, '0');
+    const eMin = String(endTime.getUTCMinutes()).padStart(2, '0');
+    title.textContent = `GATE GANTT CHART (${sHour}:${sMin} - ${eHour}:${eMin} JST)`;
     ganttContainer.appendChild(title);
 
     // Body (Gate Axis + Chart Area + Bottom Row)
@@ -579,9 +604,16 @@ function renderGantt(flights, container) {
 
     const totalDuration = endTime - startTime;
 
-    // Draw Time Grid Lines
-    for (let i = 0; i <= 14; i++) {
-        const leftPct = (i / 14) * 100;
+    // Draw Time Grid Lines on the hour
+    let currentHourTime = new Date(startTime);
+    currentHourTime.setUTCMinutes(0, 0, 0);
+    if (startTime.getUTCMinutes() > 0) {
+        currentHourTime.setUTCHours(currentHourTime.getUTCHours() + 1);
+    }
+
+    while (currentHourTime <= endTime) {
+        const offsetMs = currentHourTime - startTime;
+        const leftPct = (offsetMs / totalDuration) * 100;
 
         // Line
         const line = document.createElement('div');
@@ -593,9 +625,11 @@ function renderGantt(flights, container) {
         const label = document.createElement('div');
         label.className = 'gantt-axis-label';
         label.style.left = `${leftPct}%`;
-        const t = new Date(startTime.getTime() + i * 3600000);
-        label.textContent = `${String(t.getUTCHours()).padStart(2, '0')}:00`;
+        label.textContent = `${String(currentHourTime.getUTCHours()).padStart(2, '0')}:00`;
         timeAxisArea.appendChild(label);
+
+        // Next hour
+        currentHourTime.setUTCHours(currentHourTime.getUTCHours() + 1);
     }
 
     // Draw Row Grid Lines
@@ -618,10 +652,14 @@ function renderGantt(flights, container) {
 
         if (endPct < 0 || startPct > 100) return;
 
+        const visibleStartPct = Math.max(0, startPct);
+        const visibleEndPct = Math.min(100, endPct);
+        const visibleWidthPct = Math.max(0, visibleEndPct - visibleStartPct);
+
         const bar = document.createElement('div');
         bar.className = 'gantt-bar';
-        bar.style.left = `${Math.max(0, startPct)}%`;
-        bar.style.width = `${Math.min(100 - Math.max(0, startPct), widthPct)}%`;
+        bar.style.left = `${visibleStartPct}%`;
+        bar.style.width = `${visibleWidthPct}%`;
 
         // Y Position based on Gate Row
         // Add a bit of padding within the row
