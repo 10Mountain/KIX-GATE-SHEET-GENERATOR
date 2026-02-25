@@ -335,6 +335,8 @@ button:active {
     /* Increased from 30px */
     position: relative;
     border-right: 2px solid black;
+    box-sizing: border-box;
+    /* Match bottom spacer */
 }
 
 .gantt-gate-label {
@@ -379,7 +381,7 @@ button:active {
     position: absolute;
     left: 0;
     right: 0;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px dashed #ccc;
     pointer-events: none;
 }
 
