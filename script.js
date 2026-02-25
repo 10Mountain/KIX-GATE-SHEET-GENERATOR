@@ -160,10 +160,21 @@ function processData(logRaw, userRaw, workReleaseRaw) {
                 }
             }
 
+            let noteText = `ATA: ${entry.ata} / ${discrpStr}`;
+            if (/MOD\s+TYPE\s+W\s+MOD\s+NO\.?\s*G-1208100-00-02/i.test(discrpStr)) {
+                noteText = "32-10 PIVOT LUB";
+            } else if (/MOD\s+TYPE\s+E\s+MOD\s+NO\.?\s*H-3131-7-5001/i.test(discrpStr)) {
+                noteText = "31-31 PCMCIA CARD";
+            } else if (/MOD\s+TYPE\s+W\s+MOD\s+NO\.?\s*G-2716000-00-01/i.test(discrpStr)) {
+                noteText = "27-10 ACE MONITORING";
+            } else if (/MOD\s+TYPE\s+W\s+MOD\s+NO\.?\s*G-2714000-00-01/i.test(discrpStr)) {
+                noteText = "27-10 PFC";
+            }
+
             if (!workReleaseMap[entry.acn]) {
                 workReleaseMap[entry.acn] = [];
             }
-            workReleaseMap[entry.acn].push(`ATA: ${entry.ata} / ${discrpStr}`);
+            workReleaseMap[entry.acn].push(noteText);
         };
 
         wrLines.forEach(line => {
