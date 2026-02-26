@@ -169,6 +169,8 @@ function processData(logRaw, userRaw, workReleaseRaw) {
                 noteText = "27-10 ACE MONITORING";
             } else if (/MOD\s+TYPE\s+W\s+MOD\s+NO\.?\s*G-2714000-00-01/i.test(discrpStr)) {
                 noteText = "27-10 PFC";
+            } else if (/MOD\s+TYPE\s+E\s+MOD\s+NO\.?\s*G-2560-E0323447/i.test(discrpStr)) {
+                noteText = "25-60 / EVAS CHK";
             }
 
             if (!workReleaseMap[entry.acn]) {
