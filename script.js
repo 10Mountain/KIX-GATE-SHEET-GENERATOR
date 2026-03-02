@@ -62,8 +62,8 @@ function processData(logRaw, userRaw, workReleaseRaw) {
                     // 1. Is it a known CHK keyword?
                     if (chkKeywords.includes(upperT) || /^SVC/i.test(t) || /^DAILY/i.test(t)) {
                         chk = t.toUpperCase();
-                        if (i + 1 < tokens.length && /^(chk|check)$/i.test(tokens[i+1])) {
-                            chk += " " + tokens[i+1].toUpperCase();
+                        if (i + 1 < tokens.length && /^(chk|check)$/i.test(tokens[i + 1])) {
+                            chk += " " + tokens[i + 1].toUpperCase();
                             i += 2;
                         } else {
                             i++;
@@ -291,13 +291,30 @@ function processData(logRaw, userRaw, workReleaseRaw) {
         // Convert to JST (UTC+9)
         const toJST = (dStr, tStr) => {
             const [h, m] = tStr.split(':').map(Number);
+            const refDate = parseInt(dStr);
 
             // Use current year/month to align with "Now" axis
             const now = new Date();
-            const year = now.getFullYear();
-            const month = now.getMonth(); // 0-indexed
+            let year = now.getFullYear();
+            let month = now.getMonth(); // 0-indexed
 
-            const date = new Date(Date.UTC(year, month, parseInt(dStr), h, m));
+            // Handle month rollover (e.g., today is 2nd, but we have data for 28th, 29th, 30th, 31st)
+            if (now.getDate() <= 10 && refDate >= 25) {
+                month -= 1;
+                if (month < 0) {
+                    month = 11;
+                    year -= 1;
+                }
+            } else if (now.getDate() >= 25 && refDate <= 5) {
+                // Also handle if today is end of month and we have next month's data
+                month += 1;
+                if (month > 11) {
+                    month = 0;
+                    year += 1;
+                }
+            }
+
+            const date = new Date(Date.UTC(year, month, refDate, h, m));
             date.setHours(date.getHours() + 9);
 
             const newDay = String(date.getUTCDate()).padStart(2, '0');
