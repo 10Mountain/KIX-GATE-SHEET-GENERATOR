@@ -60,9 +60,14 @@ function processData(logRaw, userRaw, workReleaseRaw) {
                     const upperT = t.toUpperCase();
 
                     // 1. Is it a known CHK keyword?
-                    if (chkKeywords.includes(upperT) || /^SVC/i.test(t)) {
-                        chk = t;
-                        i++; // Move to next for notes
+                    if (chkKeywords.includes(upperT) || /^SVC/i.test(t) || /^DAILY/i.test(t)) {
+                        chk = t.toUpperCase();
+                        if (i + 1 < tokens.length && /^(chk|check)$/i.test(tokens[i+1])) {
+                            chk += " " + tokens[i+1].toUpperCase();
+                            i += 2;
+                        } else {
+                            i++;
+                        }
                         break; // Stop parsing names/CHK, the rest are notes
                     }
 
@@ -376,15 +381,15 @@ function processData(logRaw, userRaw, workReleaseRaw) {
                 f.NOTES = wrText;
             }
 
-            // Rule: If SVC CHK is present in Work Release notes, set CHK to SVC and bg-pink
+            // Rule: If SVC CHK is present in Work Release notes, set CHK to SVC CHK and bg-pink
             if (wrText.includes("SVC CHK")) {
-                f.CHK = "SVC";
+                f.CHK = "SVC CHK";
                 f.CHK_BG = "bg-pink";
             }
         }
 
         // Background Logic
-        if ((f.CHK && (f.CHK.includes("PDSC") || f.CHK.includes("DAILY"))) ||
+        if ((f.CHK && (/PDSC/i.test(f.CHK) || /DAILY/i.test(f.CHK) || /SVC/i.test(f.CHK))) ||
             (f.FLT_3.startsWith('8') && ['ANC', 'MEM', 'ING', 'OAK', 'IND'].includes(f.DEST))) {
             f.CHK_BG = "bg-pink";
         }
