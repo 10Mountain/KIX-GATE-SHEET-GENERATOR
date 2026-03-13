@@ -2,6 +2,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const generateBtn = document.getElementById('generate-btn');
     const container = document.getElementById('sheet-container');
 
+    // Add event listeners for Clear buttons
+    const clearBtns = document.querySelectorAll('.clear-btn');
+    clearBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const targetId = e.target.getAttribute('data-target');
+            if (targetId) {
+                const targetEl = document.getElementById(targetId);
+                if (targetEl) {
+                    targetEl.value = '';
+                }
+            }
+        });
+    });
+
     generateBtn.addEventListener('click', () => {
         const logData = document.getElementById('flight-log').value;
         const workReleaseData = document.getElementById('work-release').value;

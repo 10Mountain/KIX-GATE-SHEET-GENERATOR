@@ -17,17 +17,26 @@
         <p>Please paste the raw data below and click "Generate". Then use browser print (Ctrl+P) to save as PDF.</p>
 
         <div class="input-group">
-            <label for="flight-log">Flight Data ( Paste gate sheet Lite):</label>
+            <div class="label-row">
+                <label for="flight-log">Flight Data ( Paste gate sheet Lite):</label>
+                <button type="button" class="clear-btn" data-target="flight-log">Clear</button>
+            </div>
             <textarea id="flight-log" placeholder="Paste flight log data here..." rows="10"></textarea>
         </div>
 
         <div class="input-group">
-            <label for="work-release">Todays Work Release (Paste here):</label>
+            <div class="label-row">
+                <label for="work-release">Todays Work Release (Paste here):</label>
+                <button type="button" class="clear-btn" data-target="work-release">Clear</button>
+            </div>
             <textarea id="work-release" placeholder="Paste Todays Work Release data here..." rows="10"></textarea>
         </div>
 
         <div class="input-group">
-            <label for="user-text">Personnel / Memo Data (Paste here):</label>
+            <div class="label-row">
+                <label for="user-text">Personnel / Memo Data (Paste here):</label>
+                <button type="button" class="clear-btn" data-target="user-text">Clear</button>
+            </div>
             <textarea id="user-text" placeholder="Paste personnel/memo data here..." rows="10"></textarea>
         </div>
 

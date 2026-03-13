@@ -107,6 +107,39 @@ label {
     transform: rotate(1deg);
 }
 
+.label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.clear-btn {
+    width: auto;
+    padding: 5px 15px;
+    font-size: 0.9rem;
+    background-color: var(--memphis-pink);
+    border: 2px solid var(--memphis-black);
+    box-shadow: 3px 3px 0px var(--memphis-black);
+    border-radius: 8px;
+    text-transform: uppercase;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.1s;
+    margin: 0;
+}
+
+.clear-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0px var(--memphis-black);
+    background-color: #ff99c8;
+}
+
+.clear-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0px var(--memphis-black);
+}
+
 textarea,
 input[type="text"] {
     width: 100%;
