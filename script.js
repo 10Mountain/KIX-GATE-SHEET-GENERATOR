@@ -190,6 +190,8 @@ function processData(logRaw, userRaw, workReleaseRaw) {
                 noteText = "27-10 PFC";
             } else if (/MOD\s+TYPE\s+E\s+MOD\s+NO\.?\s*G-2560-E0323447/i.test(discrpStr)) {
                 noteText = "25-60 / EVAS CHK";
+            } else if (entry.ata === "05-43" && /UPDATE\s+COMPUTER\s+WITH\s+CURRENT/i.test(discrpStr)) {
+                noteText = "ATA 05-43 / FMS UPDATE";
             }
 
             if (!workReleaseMap[entry.acn]) {
@@ -405,9 +407,9 @@ function processData(logRaw, userRaw, workReleaseRaw) {
         // Merge Work Release Data
         const wrNotes = workReleaseMap[f.FLT_3];
         if (wrNotes && wrNotes.length > 0) {
-            const wrText = wrNotes.join("\n");
+            const wrText = wrNotes.join("[[SPACER]]");
             if (f.NOTES) {
-                f.NOTES += "\n" + wrText;
+                f.NOTES += "[[SPACER]]" + wrText;
             } else {
                 f.NOTES = wrText;
             }
@@ -525,6 +527,8 @@ function renderSheets(flights, highlightName) {
             let safeNotes = escapeHtml(`Notes: ${f.NOTES}`);
             // Highlight 'spj push' in blue (case-insensitive)
             safeNotes = safeNotes.replace(/(spj\s*push)/ig, '<span style="color: blue; font-weight: bold;">$1</span>');
+            // Insert wide spacing for multiple Work Release data entries
+            safeNotes = safeNotes.replace(/\[\[SPACER\]\]/g, '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
 
             notesRow.innerHTML = safeNotes;
             notesRow.style.color = f.NOTE_COLOR;
