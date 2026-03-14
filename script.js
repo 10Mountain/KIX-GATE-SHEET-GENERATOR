@@ -194,6 +194,10 @@ function processData(logRaw, userRaw, workReleaseRaw) {
                 noteText = "ATA 05-43 / FMS NAV DATA UPDATE";
             } else if (entry.ata === "05-43" && /UPDATE\s+#1\s+AND\s+#2\s+EFB'S\s+WITH/i.test(discrpStr)) {
                 noteText = "ATA 05-43 / EFB UPDATE";
+            } else if (entry.ata === "05-00" && /MOD\s+NO\.?\s*H-2701000-00-02/i.test(discrpStr)) {
+                noteText = "ATA 05-00 / RUDDER PCU OPS";
+            } else if (entry.ata === "05-00" && /MOD\s+NO\.?\s*H-2701800-00-01/i.test(discrpStr)) {
+                noteText = "ATA 05-00 / ELEVATOR PCU OPS";
             }
 
             if (!workReleaseMap[entry.acn]) {
