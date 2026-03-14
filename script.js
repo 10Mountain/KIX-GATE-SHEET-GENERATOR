@@ -191,7 +191,9 @@ function processData(logRaw, userRaw, workReleaseRaw) {
             } else if (/MOD\s+TYPE\s+E\s+MOD\s+NO\.?\s*G-2560-E0323447/i.test(discrpStr)) {
                 noteText = "25-60 / EVAS CHK";
             } else if (entry.ata === "05-43" && /UPDATE\s+COMPUTER\s+WITH\s+CURRENT/i.test(discrpStr)) {
-                noteText = "ATA 05-43 / FMS UPDATE";
+                noteText = "ATA 05-43 / FMS NAV DATA UPDATE";
+            } else if (entry.ata === "05-43" && /UPDATE\s+#1\s+AND\s+#2\s+EFB'S\s+WITH/i.test(discrpStr)) {
+                noteText = "ATA 05-43 / EFB UPDATE";
             }
 
             if (!workReleaseMap[entry.acn]) {
