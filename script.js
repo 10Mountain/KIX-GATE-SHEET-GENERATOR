@@ -198,9 +198,9 @@ function processData(logRaw, userRaw, workReleaseRaw) {
                 noteText = "ATA 05-00 / RUDDER PCU OPS";
             } else if (entry.ata === "05-00" && /MOD\s+NO\.?\s*H-2701800-00-01/i.test(discrpStr)) {
                 noteText = "ATA 05-00 / ELEVATOR PCU OPS";
-            } else if (/MOD\s+TYPE\s+W\s+MOD\s+NO\.?\s*H-3100200-00-01/i.test(discrpStr)) {
+            } else if (/H-3100200-00-01/i.test(discrpStr)) {
                 noteText = "ATA 05-00 / DFDR ULB BATTERY INSP";
-            } else if (/MOD\s+TYPE\s+W\s+MOD\s+NO\.?\s*H-2300500-00-01/i.test(discrpStr)) {
+            } else if (/H-2300500-00-01/i.test(discrpStr)) {
                 noteText = "ATA 05-00 /VOICE RCDR ULB BATTERY INSP";
             }
 
