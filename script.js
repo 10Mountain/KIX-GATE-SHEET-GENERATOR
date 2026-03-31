@@ -163,6 +163,7 @@ function processData(logRaw, userRaw, workReleaseRaw) {
             const parts = entry.rawText.split(/\s+/);
             const acn = parts[0];
             const ata = parts[1];
+            const nbr = parts[2] || "";
 
             // Find Open Date index
             let dateIdx = -1;
@@ -224,32 +225,33 @@ function processData(logRaw, userRaw, workReleaseRaw) {
                 }
             }
 
-            let noteText = `ATA: ${ata} / ${discrpStr}`;
             if (/MOD\s+TYPE\s+W\s+MOD\s+NO\.?\s*G-1208100-00-02/i.test(discrpStr)) {
-                noteText = "32-10 PIVOT LUB";
+                discrpStr = "PIVOT LUB";
             } else if (/MOD\s+TYPE\s+E\s+MOD\s+NO\.?\s*H-3131-7-5001/i.test(discrpStr)) {
-                noteText = "31-31 PCMCIA CARD";
+                discrpStr = "PCMCIA CARD";
             } else if (/MOD\s+TYPE\s+W\s+MOD\s+NO\.?\s*G-2716000-00-01/i.test(discrpStr)) {
-                noteText = "27-10 ACE MONITORING";
+                discrpStr = "ACE MONITORING";
             } else if (/MOD\s+TYPE\s+W\s+MOD\s+NO\.?\s*G-2714000-00-01/i.test(discrpStr)) {
-                noteText = "27-10 PFC";
+                discrpStr = "PFC";
             } else if (/MOD\s+TYPE\s+E\s+MOD\s+NO\.?\s*G-2560-E0323447/i.test(discrpStr)) {
-                noteText = "25-60 / EVAS CHK";
+                discrpStr = "EVAS CHK";
             } else if (/MOD\s+TYPE\s+E\s+MOD\s+NO\.?\s*H-2560-E0324416/i.test(discrpStr)) {
-                noteText = "25-60 / EVAS INSP";
+                discrpStr = "EVAS INSP";
             } else if (ata === "05-43" && /UPDATE\s+COMPUTER\s+WITH\s+CURRENT/i.test(discrpStr)) {
-                noteText = "ATA 05-43 / FMS NAV DATA UPDATE";
+                discrpStr = "FMS NAV DATA UPDATE";
             } else if (ata === "05-43" && /UPDATE\s+#1\s+AND\s+#2\s+EFB'S\s+WITH/i.test(discrpStr)) {
-                noteText = "ATA 05-43 / EFB UPDATE";
+                discrpStr = "EFB UPDATE";
             } else if (ata === "05-00" && /MOD\s+NO\.?\s*H-2701000-00-02/i.test(discrpStr)) {
-                noteText = "ATA 05-00 / RUDDER PCU OPS";
+                discrpStr = "RUDDER PCU OPS";
             } else if (ata === "05-00" && /MOD\s+NO\.?\s*H-2701800-00-01/i.test(discrpStr)) {
-                noteText = "ATA 05-00 / ELEVATOR PCU OPS";
+                discrpStr = "ELEVATOR PCU OPS";
             } else if (/H-3100200-00-01/i.test(discrpStr)) {
-                noteText = "ATA 05-00 / DFDR ULB BATTERY INSP";
+                discrpStr = "DFDR ULB BATTERY INSP";
             } else if (/H-2300500-00-01/i.test(discrpStr)) {
-                noteText = "ATA 05-00 /VOICE RCDR ULB BATTERY INSP";
+                discrpStr = "VOICE RCDR ULB BATTERY INSP";
             }
+
+            let noteText = `ATA ${ata} / ${nbr} / ${discrpStr}`;
 
             if (!workReleaseMap[acn]) {
                 workReleaseMap[acn] = [];
