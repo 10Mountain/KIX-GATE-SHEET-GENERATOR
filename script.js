@@ -163,7 +163,15 @@ function processData(logRaw, userRaw, workReleaseRaw) {
             const parts = entry.rawText.split(/\s+/);
             const acn = parts[0];
             const ata = parts[1];
-            const nbr = parts[2] || "";
+            
+            let nbr = "";
+            if (/^\d{4}$/.test(parts[2])) {
+                nbr = parts[2];
+            } else if (/^\d{4}$/.test(parts[3])) {
+                nbr = parts[3];
+            } else {
+                nbr = parts[2] || "";
+            }
 
             // Find Open Date index
             let dateIdx = -1;
