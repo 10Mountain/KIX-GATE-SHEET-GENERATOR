@@ -235,6 +235,8 @@ function processData(logRaw, userRaw, workReleaseRaw) {
                 noteText = "27-10 PFC";
             } else if (/MOD\s+TYPE\s+E\s+MOD\s+NO\.?\s*G-2560-E0323447/i.test(discrpStr)) {
                 noteText = "25-60 / EVAS CHK";
+            } else if (/MOD\s+TYPE\s+E\s+MOD\s+NO\.?\s*H-2560-E0324416/i.test(discrpStr)) {
+                noteText = "25-60 / EVAS INSP";
             } else if (ata === "05-43" && /UPDATE\s+COMPUTER\s+WITH\s+CURRENT/i.test(discrpStr)) {
                 noteText = "ATA 05-43 / FMS NAV DATA UPDATE";
             } else if (ata === "05-43" && /UPDATE\s+#1\s+AND\s+#2\s+EFB'S\s+WITH/i.test(discrpStr)) {
