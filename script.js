@@ -621,13 +621,35 @@ function renderGantt(flights, container, isFullscreen = false) {
 
     let startTime, endTime;
 
-    // Use unified 24-hour timeline (06:00 to 06:00 next day) for all Gantt charts
-    startTime = new Date(nowJST);
-    startTime.setUTCHours(6, 0, 0, 0);
+    if (isFullscreen) {
+        startTime = new Date(nowJST);
+        startTime.setUTCHours(6, 0, 0, 0);
 
-    endTime = new Date(startTime);
-    endTime.setUTCDate(endTime.getUTCDate() + 1);
-    endTime.setUTCHours(6, 0, 0, 0);
+        endTime = new Date(startTime);
+        endTime.setUTCDate(endTime.getUTCDate() + 1);
+        endTime.setUTCHours(6, 0, 0, 0);
+    } else {
+        if (totalMins >= 61 && totalMins <= 839) { // Day Shift: 01:01 - 13:59 (10:01 - 22:59 JST)
+            // Set Day Shift Time (05:30 - 19:00)
+            startTime = new Date(nowJST);
+            startTime.setUTCHours(5, 30, 0, 0);
+
+            endTime = new Date(nowJST);
+            endTime.setUTCHours(19, 0, 0, 0);
+
+        } else { // Night Shift
+            // Set Night Shift Time (17:30 - 07:00 next day)
+            startTime = new Date(nowJST);
+            if (jstHour < 14) {
+                startTime.setUTCDate(startTime.getUTCDate() - 1);
+            }
+            startTime.setUTCHours(17, 30, 0, 0);
+
+            endTime = new Date(startTime);
+            endTime.setUTCDate(endTime.getUTCDate() + 1);
+            endTime.setUTCHours(7, 0, 0, 0);
+        }
+    }
 
     // 2. Prepare Gate Axis (FIXED: 251-260)
     const sortedGates = ["251", "252", "253", "254", "255", "256", "257", "258", "259", "260"];
