@@ -621,38 +621,13 @@ function renderGantt(flights, container, isFullscreen = false) {
 
     let startTime, endTime;
 
-    if (isFullscreen) {
-        startTime = new Date(nowJST);
-        if (jstHour < 6) {
-            startTime.setUTCDate(startTime.getUTCDate() - 1);
-        }
-        startTime.setUTCHours(6, 0, 0, 0);
+    // Use unified 24-hour timeline (06:00 to 06:00 next day) for all Gantt charts
+    startTime = new Date(nowJST);
+    startTime.setUTCHours(6, 0, 0, 0);
 
-        endTime = new Date(startTime);
-        endTime.setUTCDate(endTime.getUTCDate() + 1);
-        endTime.setUTCHours(6, 0, 0, 0);
-    } else {
-        if (totalMins >= 61 && totalMins <= 839) { // Day Shift: 01:01 - 13:59 (10:01 - 22:59 JST)
-            // Set Day Shift Time (05:30 - 19:00)
-            startTime = new Date(nowJST);
-            startTime.setUTCHours(5, 30, 0, 0);
-
-            endTime = new Date(nowJST);
-            endTime.setUTCHours(19, 0, 0, 0);
-
-        } else { // Night Shift
-            // Set Night Shift Time (17:30 - 07:00 next day)
-            startTime = new Date(nowJST);
-            if (jstHour < 14) {
-                startTime.setUTCDate(startTime.getUTCDate() - 1);
-            }
-            startTime.setUTCHours(17, 30, 0, 0);
-
-            endTime = new Date(startTime);
-            endTime.setUTCDate(endTime.getUTCDate() + 1);
-            endTime.setUTCHours(7, 0, 0, 0);
-        }
-    }
+    endTime = new Date(startTime);
+    endTime.setUTCDate(endTime.getUTCDate() + 1);
+    endTime.setUTCHours(6, 0, 0, 0);
 
     // 2. Prepare Gate Axis (FIXED: 251-260)
     const sortedGates = ["251", "252", "253", "254", "255", "256", "257", "258", "259", "260"];
@@ -813,70 +788,109 @@ function renderGantt(flights, container, isFullscreen = false) {
         // Calculate X Position
         const startPct = ((f.arrVal - startTime) / totalDuration) * 100;
         const endPct = ((f.depVal - startTime) / totalDuration) * 100;
-        const widthPct = endPct - startPct;
 
         if (endPct < 0 || startPct > 100) return;
 
         const visibleStartPct = Math.max(0, startPct);
-        const visibleEndPct = Math.min(100, endPct);
-        const visibleWidthPct = Math.max(0, visibleEndPct - visibleStartPct);
-
+        
         const bar = document.createElement('div');
         bar.className = 'gantt-bar';
         bar.style.left = `${visibleStartPct}%`;
-        bar.style.width = `${visibleWidthPct}%`;
 
         // Y Position based on Gate Row
-        // Add a bit of padding within the row
         bar.style.top = `${gateIdx * rowHeight + (rowHeight * 0.1)}%`; // 10% of row height padding top within row
         bar.style.height = `${rowHeight * 0.8}%`; // 80% of row height
 
+        // Color
         let bgColor = 'lightblue';
         const acnStr = String(f.acn || '');
         if (acnStr.startsWith('8')) {
             bgColor = '#ce93d8'; // Slightly darker Purple (Material 200)
         } else if (acnStr.startsWith('1')) {
-            bgColor = '#fff9c4'; // Light Yellow (Material 100)
+            bgColor = '#fbc02d'; // Darker Yellow (Material 700) for white text legibility
         } else if (acnStr.startsWith('5')) {
             bgColor = '#c8e6c9'; // Light Green (Material 100)
         }
 
         bar.style.backgroundColor = bgColor;
 
-        // Content
-        const textContainer = document.createElement('div');
-        textContainer.className = 'gantt-bar-text';
-        textContainer.style.display = 'flex';
-        textContainer.style.gap = '8px';
-        textContainer.style.alignItems = 'center';
-
-        const acnLabel = document.createElement('span');
-        acnLabel.style.display = 'flex';
-        acnLabel.style.alignItems = 'center';
-        acnLabel.style.gap = '4px';
-        
-        // Dynamically calculate font size to comfortably fill the bar without using container queries that break on older iPads
-        const maxTextFontSize = isFullscreen ? 'calc((100vh - 75px) * 0.056)' : '16px';
-        
-        acnLabel.innerHTML = `<span class="acn-max-text" style="font-size: ${maxTextFontSize};">${f.acn}</span> <span class="gantt-bar-subtext">(${f.CHK || '-'})</span>`;
-        textContainer.appendChild(acnLabel);
-
-        // Duration
         const diffMs = f.depVal - f.arrVal;
-        const totalMinutes = Math.floor(diffMs / 60000); // Calculate total minutes
-        const diffH = Math.floor(totalMinutes / 60);
-        const diffM = totalMinutes % 60;
-        const durStr = `${String(diffH).padStart(2, '0')}:${String(diffM).padStart(2, '0')}`;
+        const totalMinutes = Math.floor(diffMs / 60000); 
 
-        // Only show if GND time is greater than 2 hours 30 mins (150 mins)
-        if (totalMinutes > 150) {
-            const gndLabelInline = document.createElement('span');
-            gndLabelInline.textContent = `GND TIME ${durStr}`;
-            gndLabelInline.style.color = 'blue';
-            textContainer.appendChild(gndLabelInline);
+        let widthPct = endPct - visibleStartPct;
+        if (widthPct > 100 - visibleStartPct) widthPct = 100 - visibleStartPct;
+        bar.style.width = `${widthPct}%`;
+
+        if (isFullscreen) {
+
+            // Content
+            const innerContent = document.createElement('div');
+            innerContent.className = 'gb-container';
+
+            // Left Side
+            const leftSide = document.createElement('div');
+            leftSide.className = 'gb-side gb-left';
+            leftSide.innerHTML = `
+                <div class="gb-time">${f.ARR_JST || '--:--'}</div>
+                <div class="gb-bottom">
+                    <div class="gb-box gb-border-right">${f.ORIG || '---'}</div>
+                    <div class="gb-box">${f.IN_FLT || '---'}</div>
+                </div>
+            `;
+
+            // Center ACN
+            const centerSide = document.createElement('div');
+            centerSide.className = 'gb-center';
+            const maxTextFontSize = 'calc((100vh - 75px) * 0.056)';
+            const chkText = f.CHK ? `<span class="gb-chk">(${f.CHK})</span>` : '';
+            centerSide.innerHTML = `<div class="acn-wrapper"><span class="acn-max-text" style="font-size: ${maxTextFontSize};">${f.acn}</span>${chkText}</div>`;
+
+            // Right Side
+            const rightSide = document.createElement('div');
+            rightSide.className = 'gb-side gb-right';
+            rightSide.innerHTML = `
+                <div class="gb-time">${f.DEP_JST || '--:--'}</div>
+                <div class="gb-bottom">
+                    <div class="gb-box gb-border-right">${f.OUT_FLT || '---'}</div>
+                    <div class="gb-box">${f.DEST || '---'}</div>
+                </div>
+            `;
+
+            innerContent.appendChild(leftSide);
+            innerContent.appendChild(centerSide);
+            innerContent.appendChild(rightSide);
+            
+            bar.appendChild(innerContent);
+
+            // Duration GND TIME (> 6 hours)
+            if (totalMinutes >= 360) {
+                const diffH = Math.floor(totalMinutes / 60);
+                const diffM = totalMinutes % 60;
+                const durStr = `${String(diffH).padStart(2, '0')}:${String(diffM).padStart(2, '0')}`;
+                
+                const gndLabel = document.createElement('div');
+                gndLabel.className = 'gb-gnd-time';
+                gndLabel.textContent = `GND TIME ${durStr}`;
+                bar.appendChild(gndLabel);
+            }
+        } else {
+
+            const chkStr = f.CHK ? f.CHK : '-';
+            let displayText = `<div style="background-color: white; height: 100%; display: flex; align-items: center; padding: 0 6px;"><span style="font-weight: bold; font-size: 14px;">${f.acn}</span> <span style="font-size: 11px; font-weight: normal; margin-left: 3px;">(${chkStr})</span></div>`;
+            
+            // Duration GND TIME (> 6 hours)
+            if (totalMinutes >= 360) {
+                const diffH = Math.floor(totalMinutes / 60);
+                const diffM = totalMinutes % 60;
+                const durStr = `${String(diffH).padStart(2, '0')}:${String(diffM).padStart(2, '0')}`;
+                displayText += `<span style="font-size: 10px; color: #000080; font-weight: bold; margin-left: 5px;">GND TIME ${durStr}</span>`;
+            }
+            
+            bar.innerHTML = displayText;
+            bar.style.color = 'black';
+            bar.style.overflow = 'hidden';
+            bar.style.whiteSpace = 'nowrap';
         }
-
-        bar.appendChild(textContainer);
 
         chartArea.appendChild(bar);
     });
