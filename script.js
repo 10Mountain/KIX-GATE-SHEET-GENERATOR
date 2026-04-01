@@ -52,7 +52,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (ganttBtn) {
-        ganttBtn.addEventListener('click', () => {
+        ganttBtn.addEventListener('click', (e) => {
+            e.preventDefault();
             const logData = document.getElementById('flight-log').value;
             const workReleaseData = document.getElementById('work-release').value;
             const userData = document.getElementById('user-text').value;
@@ -62,13 +63,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            // iPad/Safari Popup Blocker workaround: Open window immediately upon click
+            // before any computations, otherwise strict browsers will intercept it.
+            const newTab = window.open('about:blank', '_blank');
+
             try {
                 const flights = processData(logData, userData, workReleaseData);
                 sessionStorage.setItem('ganttFlights', JSON.stringify(flights));
-                window.open('gantt.html', '_blank');
-            } catch (e) {
-                console.error(e);
-                alert("Error processing data: " + e.message);
+                
+                if (newTab) {
+                    newTab.location.href = 'gantt.html'; // Navigate the allowed tab
+                } else {
+                    // Fallback: If device absolutely forbids popups, just navigate normally.
+                     window.location.href = 'gantt.html';
+                }
+            } catch (err) {
+                console.error(err);
+                if (newTab) newTab.close();
+                alert("Error processing data: " + err.message);
             }
         });
     }
