@@ -842,7 +842,11 @@ function renderGantt(flights, container, isFullscreen = false) {
         acnLabel.style.display = 'flex';
         acnLabel.style.alignItems = 'center';
         acnLabel.style.gap = '4px';
-        acnLabel.innerHTML = `<span class="acn-max-text">${f.acn}</span> <span class="gantt-bar-subtext">(${f.CHK || '-'})</span>`;
+        
+        // Dynamically calculate font size to comfortably fill the bar without using container queries that break on older iPads
+        const maxTextFontSize = isFullscreen ? 'calc((100vh - 75px) * 0.056)' : '16px';
+        
+        acnLabel.innerHTML = `<span class="acn-max-text" style="font-size: ${maxTextFontSize};">${f.acn}</span> <span class="gantt-bar-subtext">(${f.CHK || '-'})</span>`;
         textContainer.appendChild(acnLabel);
 
         // Duration

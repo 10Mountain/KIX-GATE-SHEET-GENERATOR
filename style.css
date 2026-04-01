@@ -382,6 +382,7 @@ button:active {
     overflow-x: auto;
     overflow-y: hidden;
     position: relative;
+    -webkit-overflow-scrolling: touch; /* Enable smooth scrolling on iPad/iOS Safari */
 }
 
 .gantt-scroll-content {
@@ -583,7 +584,6 @@ button:active {
     justify-content: flex-start;
     overflow: hidden;
     z-index: 5;
-    container-type: size; /* Enable container query layout sizing for children */
 }
 
 .gantt-bar-text {
@@ -600,8 +600,6 @@ button:active {
 }
 
 .acn-max-text {
-    font-size: 20px; /* Fallback for unsupported browsers */
-    font-size: 80cqh; /* 80% of exactly the container's height! */
     font-weight: 900; /* Extra bold for maximum readability */
     line-height: 1; /* Keep tightly boxed */
 }
