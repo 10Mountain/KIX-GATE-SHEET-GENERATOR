@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 const flights = processData(logData, userData, workReleaseData);
-                sessionStorage.setItem('ganttFlights', JSON.stringify(flights));
+                localStorage.setItem('ganttFlights', JSON.stringify(flights));
                 
                 if (newTab) {
                     newTab.location.href = 'gantt.html'; // Navigate the allowed tab
@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (document.body.id === 'gantt-fullscreen-body') {
-        const raw = sessionStorage.getItem('ganttFlights');
+        const raw = localStorage.getItem('ganttFlights');
         if (raw) {
             const flights = JSON.parse(raw).map(f => {
                 f.arrVal = new Date(f.arrVal);
