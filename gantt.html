@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gantt Chart Fullscreen</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 5mm;
+            }
+            body, html {
+                margin: 0 !important;
+                padding: 0 !important;
+                background-color: white !important;
+                height: 100% !important;
+            }
+            #gantt-fullscreen-wrapper {
+                height: 98vh !important;
+            }
+            .gantt-scroll-right {
+                overflow: hidden !important; 
+            }
+            .gantt-scroll-content {
+                width: 100% !important; /* Squashes the 24 hours strictly to page width */
+                min-width: 100% !important;
+            }
+            .gantt-container.fullscreen .gantt-axis-label,
+            .gantt-container.fullscreen .gantt-bar,
+            .corner-time, 
+            .corner-gate {
+                font-size: 10px !important; /* Decrease text scaling for dense page */
+            }
+            .gantt-container.fullscreen .gantt-gate-label {
+                font-size: 12px !important;
+            }
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+    </style>
+</head>
+<body id="gantt-fullscreen-body">
+
+    <div id="gantt-fullscreen-wrapper">
+        <!-- Rendered Here -->
+    </div>
+
+    <!-- We load script.js which will detect 'gantt-fullscreen-body' and render the chart -->
+    <script src="script.js"></script>
+</body>
+</html>

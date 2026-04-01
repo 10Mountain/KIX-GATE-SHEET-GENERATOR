@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const generateBtn = document.getElementById('generate-btn');
+    const ganttBtn = document.getElementById('gantt-btn');
     const container = document.getElementById('sheet-container');
 
     // Add event listeners for Clear buttons
@@ -16,37 +17,75 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    generateBtn.addEventListener('click', () => {
-        const logData = document.getElementById('flight-log').value;
-        const workReleaseData = document.getElementById('work-release').value;
-        const userData = document.getElementById('user-text').value;
+    if (generateBtn) {
+        generateBtn.addEventListener('click', () => {
+            const logData = document.getElementById('flight-log').value;
+            const workReleaseData = document.getElementById('work-release').value;
+            const userData = document.getElementById('user-text').value;
 
-        let highlightName = "";
-        const highlightInput = document.getElementById('highlight-name');
-        if (highlightInput) {
-            highlightName = highlightInput.value.trim();
+            let highlightName = "";
+            const highlightInput = document.getElementById('highlight-name');
+            if (highlightInput) {
+                highlightName = highlightInput.value.trim();
 
-            // Special alias for Eric
-            const ericAliases = ["eric", "ERIC", "エリック"];
-            if (ericAliases.includes(highlightName)) {
-                highlightName = "E・Ｈ";
+                // Special alias for Eric
+                const ericAliases = ["eric", "ERIC", "エリック"];
+                if (ericAliases.includes(highlightName)) {
+                    highlightName = "E・Ｈ";
+                }
             }
-        }
 
-        if (!logData.trim()) {
-            alert('Please paste Flight Log data.');
-            return;
-        }
+            if (!logData.trim()) {
+                alert('Please paste Flight Log data.');
+                return;
+            }
 
-        try {
-            console.log("Generating Sheet (Version: Fixed Gates 251-260)");
-            const flights = processData(logData, userData, workReleaseData);
-            renderSheets(flights, highlightName);
-        } catch (e) {
-            console.error(e);
-            alert("Error processing data: " + e.message);
+            try {
+                console.log("Generating Sheet (Version: Fixed Gates 251-260)");
+                const flights = processData(logData, userData, workReleaseData);
+                renderSheets(flights, highlightName);
+            } catch (e) {
+                console.error(e);
+                alert("Error processing data: " + e.message);
+            }
+        });
+    }
+
+    if (ganttBtn) {
+        ganttBtn.addEventListener('click', () => {
+            const logData = document.getElementById('flight-log').value;
+            const workReleaseData = document.getElementById('work-release').value;
+            const userData = document.getElementById('user-text').value;
+
+            if (!logData.trim()) {
+                alert('Please paste Flight Log data.');
+                return;
+            }
+
+            try {
+                const flights = processData(logData, userData, workReleaseData);
+                sessionStorage.setItem('ganttFlights', JSON.stringify(flights));
+                window.open('gantt.html', '_blank');
+            } catch (e) {
+                console.error(e);
+                alert("Error processing data: " + e.message);
+            }
+        });
+    }
+
+    if (document.body.id === 'gantt-fullscreen-body') {
+        const raw = sessionStorage.getItem('ganttFlights');
+        if (raw) {
+            const flights = JSON.parse(raw).map(f => {
+                f.arrVal = new Date(f.arrVal);
+                f.depVal = new Date(f.depVal);
+                f.sortVal = new Date(f.sortVal);
+                return f;
+            });
+            const wrapper = document.getElementById('gantt-fullscreen-wrapper');
+            renderGantt(flights, wrapper, true);
         }
-    });
+    }
 });
 
 // --- Logic ---
@@ -558,7 +597,7 @@ function renderSheets(flights, highlightName) {
     });
 }
 
-function renderGantt(flights, container) {
+function renderGantt(flights, container, isFullscreen = false) {
     if (flights.length === 0) return;
 
     // 1. Calculate Time Axis based on current time
@@ -569,39 +608,68 @@ function renderGantt(flights, container) {
     const totalMins = jstHour * 60 + jstMinute;
 
     let startTime, endTime;
-    // 01:01 (61) to 13:59 (839)
-    if (totalMins >= 61 && totalMins <= 839) {
-        // Day shift: 05:30 to 19:00
+
+    if (isFullscreen) {
         startTime = new Date(nowJST);
-        startTime.setUTCHours(5, 30, 0, 0);
-        endTime = new Date(nowJST);
-        endTime.setUTCHours(19, 0, 0, 0);
-    } else {
-        // Night shift: 17:30 to 07:00
-        startTime = new Date(nowJST);
-        if (jstHour < 14) {
+        if (jstHour < 6) {
             startTime.setUTCDate(startTime.getUTCDate() - 1);
         }
-        startTime.setUTCHours(17, 30, 0, 0);
+        startTime.setUTCHours(6, 0, 0, 0);
+
         endTime = new Date(startTime);
         endTime.setUTCDate(endTime.getUTCDate() + 1);
-        endTime.setUTCHours(7, 0, 0, 0);
+        endTime.setUTCHours(6, 0, 0, 0);
+    } else {
+        if (totalMins >= 61 && totalMins <= 839) { // Day Shift: 01:01 - 13:59 (10:01 - 22:59 JST)
+            // Set Day Shift Time (05:30 - 19:00)
+            startTime = new Date(nowJST);
+            startTime.setUTCHours(5, 30, 0, 0);
+
+            endTime = new Date(nowJST);
+            endTime.setUTCHours(19, 0, 0, 0);
+
+        } else { // Night Shift
+            // Set Night Shift Time (17:30 - 07:00 next day)
+            startTime = new Date(nowJST);
+            if (jstHour < 14) {
+                startTime.setUTCDate(startTime.getUTCDate() - 1);
+            }
+            startTime.setUTCHours(17, 30, 0, 0);
+
+            endTime = new Date(startTime);
+            endTime.setUTCDate(endTime.getUTCDate() + 1);
+            endTime.setUTCHours(7, 0, 0, 0);
+        }
     }
 
     // 2. Prepare Gate Axis (FIXED: 251-260)
     const sortedGates = ["251", "252", "253", "254", "255", "256", "257", "258", "259", "260"];
 
     const ganttContainer = document.createElement('div');
-    ganttContainer.className = 'gantt-container';
+    ganttContainer.className = isFullscreen ? 'gantt-container fullscreen' : 'gantt-container';
 
     // Title
     const title = document.createElement('div');
     title.className = 'gantt-title';
-    const sHour = String(startTime.getUTCHours()).padStart(2, '0');
-    const sMin = String(startTime.getUTCMinutes()).padStart(2, '0');
-    const eHour = String(endTime.getUTCHours()).padStart(2, '0');
-    const eMin = String(endTime.getUTCMinutes()).padStart(2, '0');
-    title.textContent = `GATE GANTT CHART (${sHour}:${sMin} - ${eHour}:${eMin} JST)`;
+
+    if (isFullscreen) {
+        const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+        const d = String(startTime.getUTCDate()).padStart(2, '0');
+        const m = months[startTime.getUTCMonth()];
+        const y = String(startTime.getUTCFullYear()).slice(-2);
+        
+        const gh = String(nowJST.getUTCHours()).padStart(2, '0');
+        const gm = String(nowJST.getUTCMinutes()).padStart(2, '0');
+        
+        const generatedText = `Gen: ${gh}:${gm}`;
+        title.innerHTML = `<span>KIX GATE GANTT CHART</span> <span class="title-date-block">${d} ${m} '${y} <span style="font-size: 12px; margin-left: 10px; font-weight: normal;">(${generatedText})</span></span>`;
+    } else {
+        const sHour = String(startTime.getUTCHours()).padStart(2, '0');
+        const sMin = String(startTime.getUTCMinutes()).padStart(2, '0');
+        const eHour = String(endTime.getUTCHours()).padStart(2, '0');
+        const eMin = String(endTime.getUTCMinutes()).padStart(2, '0');
+        title.textContent = `GATE GANTT CHART (${sHour}:${sMin} - ${eHour}:${eMin} JST)`;
+    }
     ganttContainer.appendChild(title);
 
     // Body (Gate Axis + Chart Area + Bottom Row)
@@ -609,29 +677,59 @@ function renderGantt(flights, container) {
     body.className = 'gantt-body';
     ganttContainer.appendChild(body);
 
+    const timeRow = document.createElement('div');
+    timeRow.className = 'gantt-time-row';
+
     const mainRow = document.createElement('div');
-    mainRow.style.display = 'flex';
-    mainRow.style.flexDirection = 'row';
-    mainRow.style.flex = '1';
-    body.appendChild(mainRow);
+    mainRow.className = 'gantt-main-row';
 
-    const bottomRow = document.createElement('div');
-    bottomRow.style.display = 'flex';
-    bottomRow.style.flexDirection = 'row';
-    bottomRow.style.height = '15px';
-    body.appendChild(bottomRow);
+    const cornerSpacer = document.createElement('div');
+    cornerSpacer.className = 'gantt-corner-spacer';
 
-    // --- Gate Axis (Left) ---
     const gateAxis = document.createElement('div');
     gateAxis.className = 'gantt-gate-axis';
-    mainRow.appendChild(gateAxis);
 
-    // --- Bottom Corner Spacer (Left) ---
-    const cornerSpacer = document.createElement('div');
-    cornerSpacer.style.width = '40px'; // Matching gateAxis width
-    cornerSpacer.style.borderRight = '2px solid black';
-    cornerSpacer.style.boxSizing = 'border-box';
-    bottomRow.appendChild(cornerSpacer);
+    const chartArea = document.createElement('div');
+    chartArea.className = 'gantt-chart-area';
+
+    const timeAxisArea = document.createElement('div');
+    timeAxisArea.className = 'gantt-time-axis-area';
+
+    if (isFullscreen) {
+        const flexRow = document.createElement('div');
+        flexRow.className = 'gantt-flex-row';
+        body.appendChild(flexRow);
+
+        const leftPanel = document.createElement('div');
+        leftPanel.className = 'gantt-fixed-left';
+        flexRow.appendChild(leftPanel);
+
+        cornerSpacer.innerHTML = '<span class="corner-time">TIME</span><span class="corner-gate">GATE</span>';
+        leftPanel.appendChild(cornerSpacer);
+        leftPanel.appendChild(gateAxis);
+
+        const rightPanel = document.createElement('div');
+        rightPanel.className = 'gantt-scroll-right';
+        flexRow.appendChild(rightPanel);
+
+        const scrollContent = document.createElement('div');
+        scrollContent.className = 'gantt-scroll-content';
+        rightPanel.appendChild(scrollContent);
+
+        timeRow.appendChild(timeAxisArea);
+        scrollContent.appendChild(timeRow);
+
+        mainRow.appendChild(chartArea);
+        scrollContent.appendChild(mainRow);
+    } else {
+        timeRow.appendChild(cornerSpacer);
+        timeRow.appendChild(timeAxisArea);
+        body.appendChild(timeRow);
+
+        mainRow.appendChild(gateAxis);
+        mainRow.appendChild(chartArea);
+        body.appendChild(mainRow);
+    }
 
     const numRows = sortedGates.length;
     // We need to calculate row height dynamically or use fixed
@@ -645,16 +743,6 @@ function renderGantt(flights, container) {
         label.textContent = g;
         gateAxis.appendChild(label);
     });
-
-    // --- Chart Area (Right) ---
-    const chartArea = document.createElement('div');
-    chartArea.className = 'gantt-chart-area';
-    mainRow.appendChild(chartArea);
-
-    const timeAxisArea = document.createElement('div');
-    timeAxisArea.style.flex = '1';
-    timeAxisArea.style.position = 'relative';
-    bottomRow.appendChild(timeAxisArea);
 
     const totalDuration = endTime - startTime;
 
@@ -675,11 +763,22 @@ function renderGantt(flights, container) {
         line.style.left = `${leftPct}%`;
         chartArea.appendChild(line);
 
-        // Label (Bottom)
+        // Label
         const label = document.createElement('div');
         label.className = 'gantt-axis-label';
         label.style.left = `${leftPct}%`;
         label.textContent = `${String(currentHourTime.getUTCHours()).padStart(2, '0')}:00`;
+
+        if (isFullscreen) {
+            label.style.transform = 'translate(-50%, -50%)';
+        } else {
+            if (leftPct === 0) {
+                label.style.transform = 'translateX(0)';
+            } else if (leftPct >= 100) {
+                label.style.transform = 'translateX(-100%)';
+            }
+        }
+
         timeAxisArea.appendChild(label);
 
         // Next hour
@@ -720,21 +819,30 @@ function renderGantt(flights, container) {
         bar.style.top = `${gateIdx * rowHeight + (rowHeight * 0.1)}%`; // 10% of row height padding top within row
         bar.style.height = `${rowHeight * 0.8}%`; // 80% of row height
 
-        // Color
-        if (f.CHK_BG === 'bg-pink') {
-            bar.classList.add('bg-pink');
-        } else {
-            bar.style.backgroundColor = 'lightblue';
+        let bgColor = 'lightblue';
+        const acnStr = String(f.acn || '');
+        if (acnStr.startsWith('8')) {
+            bgColor = '#ce93d8'; // Slightly darker Purple (Material 200)
+        } else if (acnStr.startsWith('1')) {
+            bgColor = '#fff9c4'; // Light Yellow (Material 100)
+        } else if (acnStr.startsWith('5')) {
+            bgColor = '#c8e6c9'; // Light Green (Material 100)
         }
+
+        bar.style.backgroundColor = bgColor;
 
         // Content
         const textContainer = document.createElement('div');
         textContainer.className = 'gantt-bar-text';
         textContainer.style.display = 'flex';
-        textContainer.style.gap = '5px';
+        textContainer.style.gap = '8px';
+        textContainer.style.alignItems = 'center';
 
         const acnLabel = document.createElement('span');
-        acnLabel.textContent = `${f.acn} (${f.CHK || '-'})`;
+        acnLabel.style.display = 'flex';
+        acnLabel.style.alignItems = 'center';
+        acnLabel.style.gap = '4px';
+        acnLabel.innerHTML = `<span class="acn-max-text">${f.acn}</span> <span class="gantt-bar-subtext">(${f.CHK || '-'})</span>`;
         textContainer.appendChild(acnLabel);
 
         // Duration
