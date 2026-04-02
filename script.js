@@ -86,16 +86,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (document.body.id === 'gantt-fullscreen-body') {
-        const raw = localStorage.getItem('ganttFlights');
+        const urlParams = new URLSearchParams(window.location.search);
+        const dataParam = urlParams.get('data');
+        let raw = null;
+
+        if (dataParam) {
+            try {
+                raw = decodeURIComponent(escape(atob(dataParam)));
+            } catch(e) {
+                console.error("URL decode error:", e);
+                alert("共有URLの読み込みに失敗しました。");
+            }
+        }
+
+        if (!raw) {
+            raw = localStorage.getItem('ganttFlights');
+        }
+
         if (raw) {
-            const flights = JSON.parse(raw).map(f => {
-                f.arrVal = new Date(f.arrVal);
-                f.depVal = new Date(f.depVal);
-                f.sortVal = new Date(f.sortVal);
-                return f;
-            });
-            const wrapper = document.getElementById('gantt-fullscreen-wrapper');
-            renderGantt(flights, wrapper, true);
+            try {
+                const flights = JSON.parse(raw).map(f => {
+                    f.arrVal = new Date(f.arrVal);
+                    f.depVal = new Date(f.depVal);
+                    if (f.sortVal) f.sortVal = new Date(f.sortVal);
+                    return f;
+                });
+                const wrapper = document.getElementById('gantt-fullscreen-wrapper');
+                renderGantt(flights, wrapper, true);
+            } catch(e) {
+                console.error("Parse error:", e);
+                alert("フライトデータの解析に失敗しました。");
+            }
         }
     }
 });
@@ -671,7 +692,10 @@ function renderGantt(flights, container, isFullscreen = false) {
         const gm = String(nowJST.getUTCMinutes()).padStart(2, '0');
         
         const generatedText = `Gen: ${gh}:${gm}`;
-        title.innerHTML = `<span>KIX GATE GANTT CHART</span> <span class="title-date-block">${d} ${m} '${y} <span style="font-size: 12px; margin-left: 10px; font-weight: normal;">(${generatedText})</span></span>`;
+        title.innerHTML = `<span>KIX GATE GANTT CHART</span> <span class="title-date-block">
+            <button id="share-btn" style="margin-right: 15px; padding: 4px 10px; cursor: pointer; background: #fff; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; font-size: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.2);">🔗 URLをコピー</button>
+            ${d} ${m} '${y} <span style="font-size: 12px; margin-left: 10px; font-weight: normal;">(${generatedText})</span>
+        </span>`;
     } else {
         const sHour = String(startTime.getUTCHours()).padStart(2, '0');
         const sMin = String(startTime.getUTCMinutes()).padStart(2, '0');
@@ -918,4 +942,33 @@ function renderGantt(flights, container, isFullscreen = false) {
     });
 
     container.appendChild(ganttContainer);
+
+    // Attach Share Button Event Listener
+    if (isFullscreen) {
+        const shareBtn = document.getElementById('share-btn');
+        if (shareBtn) {
+            shareBtn.addEventListener('click', () => {
+                try {
+                    const jsonStr = JSON.stringify(flights);
+                    const b64 = btoa(unescape(encodeURIComponent(jsonStr)));
+                    
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('data', b64);
+                    
+                    navigator.clipboard.writeText(url.toString()).then(() => {
+                        shareBtn.innerText = "✅ コピー完了！";
+                        shareBtn.style.color = "green";
+                        setTimeout(() => {
+                            shareBtn.innerText = "🔗 URLをコピー";
+                            shareBtn.style.color = "black";
+                        }, 2500);
+                    }).catch(err => {
+                        prompt("以下のURLをコピーして部下に共有してください:", url.toString());
+                    });
+                } catch(e) {
+                    alert("URLの生成に失敗しました: " + e.message);
+                }
+            });
+        }
+    }
 }
